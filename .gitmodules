@@ -1,9 +1,6 @@
 [submodule "lib/nrfx"]
 	path = lib/nrfx
 	url = https://github.com/NordicSemiconductor/nrfx.git
-[submodule "lib/CMSIS"]
-	path = lib/CMSIS
-	url = https://github.com/ARM-software/CMSIS.git
 [submodule "lib/avr"]
 	path = lib/avr
 	url = https://github.com/avr-rust/avr-mcu.git
@@ -14,3 +11,7 @@
 	path = lib/compiler-rt
 	url = https://github.com/llvm-mirror/compiler-rt.git
 	branch = release_70
+[submodule "lib/CMSIS"]
+	path = lib/CMSIS
+	url = https://github.com/ARM-software/CMSIS_5.git
+	branch = master
