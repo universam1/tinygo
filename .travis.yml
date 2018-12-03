@@ -8,8 +8,8 @@ before_install:
   - echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main"            | sudo tee -a /etc/apt/sources.list
   - echo "deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu xenial main" | sudo tee -a /etc/apt/sources.list
   - sudo apt-get update -qq
-  - sudo apt-get install llvm-7-dev clang-7 binutils-arm-none-eabi qemu-system-arm --allow-unauthenticated -y
-  - sudo ln -s /usr/bin/clang-7 /usr/local/bin/cc # work around missing -no-pie in old GCC version
+  - sudo apt-get install llvm-7-dev clang-7 gcc-avr binutils-arm-none-eabi qemu-system-arm --allow-unauthenticated -y
+#- sudo ln -s /usr/bin/clang-7 /usr/local/bin/cc # work around missing -no-pie in old GCC version
 
 install:
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
@@ -27,7 +27,7 @@ script:
   - tinygo build -o test.nrf.elf       -target=nrf52840-mdk examples/blinky1
   - tinygo build -o blinky1.nrf51d.elf -target=pca10031     examples/blinky1
   - tinygo build -o blinky1.stm32.elf  -target=bluepill     examples/blinky1
-  - tinygo build -o blinky1.avr.o      -target=arduino      examples/blinky1 # TODO: avr-as/avr-gcc doesn't work
+  - tinygo build -o blinky1.avr.elf    -target=arduino      examples/blinky1
   - tinygo build -o blinky1.reel.elf   -target=reelboard    examples/blinky1
   - tinygo build -o blinky2.reel.elf   -target=reelboard    examples/blinky2
   - tinygo build -o blinky1.pca10056.elf    -target=pca10056     examples/blinky1
