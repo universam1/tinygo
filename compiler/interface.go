@@ -119,7 +119,7 @@ func (c *Compiler) getTypeMethodSet(typ types.Type) (llvm.Value, error) {
 		}
 		methodInfo := llvm.ConstNamedStruct(interfaceMethodInfoType, []llvm.Value{
 			signatureGlobal,
-			llvm.ConstBitCast(fn, c.i8ptrType),
+			llvm.ConstBitCast(fn, c.funcPtrType),
 		})
 		methods[i] = methodInfo
 	}

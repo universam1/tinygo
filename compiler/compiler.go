@@ -55,6 +55,8 @@ type Compiler struct {
 	targetData              llvm.TargetData
 	intType                 llvm.Type
 	i8ptrType               llvm.Type // for convenience
+	funcPtrType             llvm.Type // *uint8 with func ptr address space
+	funcPtrAddrSpace        int
 	uintptrType             llvm.Type
 	coroIdFunc              llvm.Value
 	coroSizeFunc            llvm.Value
@@ -147,6 +149,9 @@ func NewCompiler(pkgName string, config Config) (*Compiler, error) {
 
 	coroFreeType := llvm.FunctionType(c.i8ptrType, []llvm.Type{c.ctx.TokenType(), c.i8ptrType}, false)
 	c.coroFreeFunc = llvm.AddFunction(c.mod, "llvm.coro.free", coroFreeType)
+
+	c.funcPtrAddrSpace = c.coroIdFunc.Type().PointerAddressSpace()
+	c.funcPtrType = llvm.PointerType(c.ctx.Int8Type(), c.funcPtrAddrSpace)
 
 	return c, nil
 }
@@ -473,6 +478,11 @@ func (c *Compiler) getLLVMType(goType types.Type) (llvm.Type, error) {
 	case *types.Map:
 		return llvm.PointerType(c.mod.GetTypeByName("runtime.hashmap"), 0), nil
 	case *types.Named:
+		if typ.Obj().Id() == "runtime.funcPtr" {
+			// Magic type that is a *uint8 but in the address space of function
+			// pointers.
+			return c.funcPtrType, nil
+		}
 		if _, ok := typ.Underlying().(*types.Struct); ok {
 			llvmType := c.mod.GetTypeByName(typ.Obj().Pkg().Path() + "." + typ.Obj().Name())
 			if llvmType.IsNil() {
@@ -535,7 +545,7 @@ func (c *Compiler) getLLVMType(goType types.Type) (llvm.Type, error) {
 		// make a closure type (with a function pointer type inside):
 		// {context, funcptr}
 		paramTypes = append(paramTypes, c.i8ptrType)
-		ptr := llvm.PointerType(llvm.FunctionType(returnType, paramTypes, false), 0)
+		ptr := llvm.PointerType(llvm.FunctionType(returnType, paramTypes, false), c.funcPtrAddrSpace)
 		ptr = c.ctx.StructType([]llvm.Type{c.i8ptrType, ptr}, false)
 		return ptr, nil
 	case *types.Slice:

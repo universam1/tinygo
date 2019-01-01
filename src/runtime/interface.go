@@ -36,9 +36,11 @@ func interfaceTypeAssert(ok bool) {
 // lowered to inline IR in the interface lowering pass.
 // See compiler/interface-lowering.go for details.
 
+type funcPtr *uint8 // magic type that has the address space of function pointers
+
 type interfaceMethodInfo struct {
-	signature *uint8 // external *i8 with a name identifying the Go function signature
-	funcptr   *uint8 // bitcast from the actual function pointer
+	signature *uint8  // external *i8 with a name identifying the Go function signature
+	funcptr   funcPtr // bitcast from the actual function pointer
 }
 
 // Pseudo function call used while putting a concrete value in an interface,
