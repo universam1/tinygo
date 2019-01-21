@@ -13,5 +13,5 @@
 		"-flavor", "wasm",
 		"-allow-undefined"
 	],
-	"emulator":      ["cwa"]
+	"emulator":      ["node", "targets/wasm_exec.js"]
 }
