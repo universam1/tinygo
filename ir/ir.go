@@ -322,6 +322,9 @@ func (f *Function) IsNoBounds() bool {
 
 // Return true iff this function is externally visible.
 func (f *Function) IsExported() bool {
+	if f.CName() != "" {
+		return true
+	}
 	return f.exported
 }
 
@@ -356,10 +359,6 @@ func (f *Function) LinkName() string {
 // a zero-length string.
 func (f *Function) CName() string {
 	name := f.Name()
-	if strings.HasPrefix(name, "_Cfunc_") {
-		// emitted by `go tool cgo`
-		return name[len("_Cfunc_"):]
-	}
 	if strings.HasPrefix(name, "C.") {
 		// created by ../loader/cgo.go
 		return name[2:]
