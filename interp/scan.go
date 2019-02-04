@@ -24,6 +24,13 @@ type sideEffectResult struct {
 // returns whether this function has side effects and if it does, which globals
 // it mentions anywhere in this function or any called functions.
 func (e *Eval) hasSideEffects(fn llvm.Value) *sideEffectResult {
+	switch fn.Name() {
+	case "runtime.alloc":
+		// Cannot be scanned but can be interpreted.
+		return &sideEffectResult{severity: sideEffectNone}
+	case "runtime._panic":
+		return &sideEffectResult{severity: sideEffectLimited}
+	}
 	if e.sideEffectFuncs == nil {
 		e.sideEffectFuncs = make(map[llvm.Value]*sideEffectResult)
 	}
@@ -73,11 +80,11 @@ func (e *Eval) hasSideEffects(fn llvm.Value) *sideEffectResult {
 					result.updateSeverity(sideEffectAll)
 					continue
 				}
-				name := child.Name()
 				if child.IsDeclaration() {
-					if name == "runtime.makeInterface" {
+					switch child.Name() {
+					case "runtime.makeInterface":
 						// Can be interpreted so does not have side effects.
-						continue
+						return &sideEffectResult{severity: sideEffectNone}
 					}
 					// External function call. Assume only limited side effects
 					// (no affected globals, etc.).
@@ -86,7 +93,7 @@ func (e *Eval) hasSideEffects(fn llvm.Value) *sideEffectResult {
 					}
 					continue
 				}
-				childSideEffects := e.hasSideEffects(fn)
+				childSideEffects := e.hasSideEffects(child)
 				switch childSideEffects.severity {
 				case sideEffectInProgress, sideEffectNone:
 					// no side effects or recursive function - continue scanning
