@@ -1,0 +1,4 @@
+written to os.Stdout
+stdin:  0
+stdout: 1
+stderr: 2
